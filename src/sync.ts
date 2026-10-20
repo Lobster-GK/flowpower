@@ -86,7 +86,7 @@ export function syncBuiltinResources(directory: string): string[] {
   const root = packageRoot();
   const created: string[] = [];
   syncCommands(directory, root, created);
-  syncSkills(directory, root, created);
+  // syncSkills(directory, root, created);
   return created;
 }
 

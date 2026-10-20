@@ -1,0 +1,80 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    "permission": "allow",
+    "mcp": {
+      "uecpui": {
+        "type": "local",
+        "command": ["uecpui", "mcp", "--version", "1.4.2"]
+      },
+      "playwright": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "@playwright/mcp@latest",
+           "--executable-path",
+           "C:/Users/mskj-guokun/AppData/Local/Google/Chrome/Application/chrome.exe"
+        ],
+        "enabled": true
+      }
+    },
+    "model": "DS/DS",
+    "provider": {
+      "Qwen3_6_27B_OC": {
+        "npm": "@ai-sdk/openai-compatible",
+        "name": "Ywen-core",
+        "options": {
+          "apiKey": "JC51nbOEhcQtYrXASr0rvriloqFD0VZx",
+          "baseURL": "http://197.0.108.123:37113/v1"
+        },
+        "models": {
+          "Qwen3_6_27B_OC": {
+            "name": "Qwen3.8-27B",
+            "modalities": {
+              "input": ["text", "image"],
+              "output": ["text"]
+            },
+            "limit": { "context": 95000, "output": 8192 }
+          }
+        }
+      },
+      "MiniMax_A": {
+        "npm": "@ai-sdk/openai-compatible",
+        "name": "Ywen-core",
+        "options": {
+          "apiKey": "JC51nbOEhcQtYrXASr0rvriloqFD0VZx",
+          "baseURL": "http://tiismapp.nlpunit.uat.cmbc.cn:36018/v1"
+        },
+        "models": {
+          "MiniMax_A": {
+            "name": "MiniMax-M2.7",
+            "modalities": { "input": ["text"], "output": ["text"] }
+          }
+        }
+      },
+      "DS": {
+        "npm": "@ai-sdk/openai-compatible",
+        "name": "DeepSeek",
+        "options": {
+           "apiKey": "JC51nbOEhcQtYrXASr0rvriloqFD0VZx",
+          "baseURL": "http://tiismapp.nlpunit.uat.cmbc.cn:36018/v1"
+        },
+        "models": {
+          "DS": {
+            "name": "Deepseek-v4-flash",
+            "limit": {
+              "context": 250000,
+              "output": 8192
+            },
+            "options": {
+              "chat_template_kwargs": {
+                "thinking": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "enabled_providers": ["Qwen3_6_27B_OC", "MiniMax_A", "DS"]
+  }
+  

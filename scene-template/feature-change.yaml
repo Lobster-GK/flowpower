@@ -5,6 +5,7 @@ notes:
   - 先定位已有实现和变更边界，再生成生码计划规格文档。
   - 只有创建新 UI 或大幅改变 UI 结构时，才要求布局说明规格文档和组件映射规格文档。
   - 不做无关重构，不顺手修改未进入计划的文件。
+  - 若用户未提供接口文档，接口补充阶段标记为 `skipped`。
 match:
   intents:
     - feature-change
@@ -26,11 +27,22 @@ stages:
       skill: frontend-codegen-plan
     output: artifacts.codegenPlanSpec
   - id: codegen
+    instruction: 严格按 codegenPlanSpec 生成代码
     use:
       subagent: afp-builder-agent
       skill: frontend-ui-codegen
     requires:
+      - artifacts.layoutSpec
+      - artifacts.componentMappingSpec
       - artifacts.codegenPlanSpec
+    output: route
+  - id: api
+    instruction: 接口逻辑补充
+    use:
+      subagent: afp-builder-agent
+      skill: frontend-api-integration
+    requires:
+      - 接口文档
   - id: lint
     use:
       subagent: afp-verifier-agent

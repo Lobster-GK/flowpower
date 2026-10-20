@@ -4,7 +4,7 @@ description: >
   将一张或多张截图、UI 图片、文字 UI 需求或已有页面描述转换为持久化中文 `01-ui-layout-spec.md`。用于在组件映射和生码计划之前盘点页面区域、
   布局树、ASCII 结构原型图、所有肉眼可见 UI 内容、元素 ID、相对位置、关键样式、文案、视觉状态、可见交互线索、分隔结构、布局约束、视觉 token、资产、状态差异和覆盖检查。
   识别时按从上到下、从左到右、从外到里的固定顺序检查文字、图片、布局和层级，并显式记录页面状态覆盖。支持同一页面多状态图片，以及
-  多 agent 独立完整识别模式：每个 agent 必须针对全部输入输出一份可独立验收、覆盖检查通过的 agent-local final layout spec，主模型再对多份完整结果做语义对齐、交叉补缺和冲突裁决，生成唯一 canonical final layout spec。不用于直接编写代码、
+  多 agent 同质观察模式：每个 agent 可输出布局、元素，并在 scene 或命令允许时输出非权威组件映射草案，主模型再合并为唯一正式 layout spec。不用于直接编写代码、
   接口集成、质量检查、普通图片描述、后端任务，或在已有 layout spec 足够明确时重复分析。
 ---
 
@@ -12,20 +12,17 @@ description: >
 
 输出必须使用中文。本 skill 主要负责生成或更新 UI 布局说明 spec，不生成代码、不执行质量检查。
 
-普通模式下，不做最终组件映射、不归属 props。多 agent 独立完整识别模式下，每个 agent 输出完整 layout spec；当配置允许时，可以另行输出非权威组件映射建议，供后续交叉校验。正式组件映射仍由 `frontend-component-mapping-spec` 产出 `02-component-mapping-spec.md`。
-
 布局说明 spec 的目标是让后续 `frontend-component-mapping-spec` 能够逐项对账页面元素，避免遗漏。它不追求像素级还原，重点是页面结构、完整元素清单、元素相对位置、关键样式、ASCII 结构原型图和可实现的布局约束。
 
 核心原则：不要输出页面摘要式 spec。只要截图中肉眼可见，并且会影响实现、布局、还原或用户理解，就必须被编号、定位并描述关键样式；无法判断用途时保留为 `unknown-visible-element`，不要省略。
 
-如果需要为本阶段指定模型，优先查看 `afp_get_project_config` 返回的 `subagents` 中 `afp-observer-agent.model`；为空时使用当前 OpenCode 会话默认模型。
 
 ## 产物
 
 自动化流程中默认写入：
 
 ```text
-.codegen/artifacts/<语义化任务名或时间戳>/01-ui-layout-spec.md
+.codegen/artifacts/<语义化任务名或时间戳>/ui-layout-spec.md
 ```
 
 如果用户指定产物路径，写入用户指定路径。如果无法写文件，在回复中给出完整 Markdown spec。
@@ -64,55 +61,42 @@ description: >
 - 相对位置不要求像素级坐标，但必须说明所属区域、在区域内的大致方位，以及和相邻元素的上下/左右/并列/嵌套/对齐/分组关系。
 - 关键样式只记录影响实现和还原的特征，例如字号层级、字重、颜色倾向、背景/边框/分隔线、突出或弱化程度、选中/禁用/警示状态、密度和对齐方式。
 
-## 多 agent 独立完整识别模式
+## 多 agent 观察模式
 
-当 scene template 或本次命令要求“多 agent 识别”“independent final”时，由多个同职责子 agent 并行使用本 skill。每个 agent 必须独立处理同一批全部输入，不按图片、区域、元素类型或页面状态分工，也不能读取其它 agent 的结果。
+当 scene template 或本次命令要求“多 agent 观察”“observation draft”时，本 skill 可以由多个同职责子 agent 并行使用。每个 agent 都必须完整观察所有输入图片，不做分工。
 
-每个 agent 输出的是 `agent-local final`，不是草案。它必须：
+每个 agent 输出的是 `agent-local final` 必须包含：
 
-- 完整包含本 skill“输出结构”规定的全部章节，并保持相同顺序。
-- 使用稳定、唯一、final-quality 的区域 ID 和元素 ID；不得使用临时 ID。
-- 独立覆盖全部输入图片、状态、可见元素、交互线索、布局约束、视觉 token、资产、状态表和 Open Questions。
-- 独立执行 Layout Coverage Check；存在 `fail` 时先自行修正，无法修正时返回失败，不得把不完整结果交给主模型补写。
-- 不得假设其它 agent 会发现或补充自己的遗漏。
+- 完整包含本 skill  “输出结构”规定的全部章节，并保持相同顺序。
+- 使用稳定、唯一、final-quality 的区域 ID 和元素 ID。
+- 独立覆盖全部输入图片、状态、可见元素、交互线索、布局约束、视觉token、资产、状态表和 open questions。
+- 独立执行 layout coverage check: 存在 `fail` 时先自行修正，无法修正时返回失败，不得把不完整结果交给主模型。
+- 不得假设其他 agent 会发现或补充自己的遗漏。
 
-当 `multiAgent.persistOutputs=true` 时，每个 agent 写入独立目录：
-
-```text
-.codegen/artifacts/<语义化任务名或时间戳>/ui-recognition-results/agent-<N>/01-ui-layout-spec.md
-```
-
-文件标题下可以增加 `agent-local-final`、agent 编号和输入图片标签等元信息，但正文必须使用完整正式输出结构。如果 `multiAgent.persistOutputs=false` 或无法写文件，必须在回复中返回完整 spec，不能返回摘要或观察清单。
-
-当 `multiAgent.options.includeComponentMapping=true` 时，可以在同一 agent 目录额外写入：
+结果建议写入：
 
 ```text
-.codegen/artifacts/<语义化任务名或时间戳>/ui-recognition-results/agent-<N>/component-mapping-suggestions.md
+.codegen/artifacts/<语义化任务名或时间戳>/ui-recognition-observations/agent-<N>.md
 ```
 
-组件映射建议必须使用该 agent 完整 layout spec 中的稳定元素 ID，但仍是后续正式组件映射的候选证据，不能替代 `02-component-mapping-spec.md`。
+如果 `multiAgent.persistOutputs=false` 或当前环境无法写文件，可以只在回复中输出结果。
 
-## 多 agent 交叉合并规则
+## 多 agent 合并规则
 
-主模型必须读取所有 `agent-local final`、重新核对原始输入，并生成唯一的 canonical final `01-ui-layout-spec.md`。不得选一份结果直接覆盖其它结果，也不得按多数票机械决定。
-
-- 先按“图片/状态 + 区域语义路径 + 元素类型 + 可见文案/内容 + 相对位置”对齐语义等价项，不直接按各 agent 的 ID 比较。
-- 多个 agent 都识别到的事实提高置信度；只有一个 agent 识别到的事实只要能从原图或需求复核，也必须进入 canonical final 或标记为 `conditional`。
-- 对三份完整结果做证据并集，逐项交叉补齐区域、元素、状态、交互线索、样式、资产、分隔和 Open Questions。
-- 文案、层级、位置、状态或样式冲突时，以原始输入复核为准；仍无法判断时保留不确定事实并写入 `Open Questions`。
-- 合并 Page State Coverage，并按最终页面类型重新评估适用状态；不能把所有 agent 都未观察到某状态当作该状态不需要实现的证据。
-- 语义对齐完成后统一生成 canonical 区域 ID 和元素 ID，并保证 Layout Wireframe、Layout Tree、UI Element Inventory、状态表和覆盖检查内部一致。
-- 任一 agent-local final 的 Coverage Check 含 `fail` 时，先要求该 agent 修正或将其标记为无效结果；不能把失败结果当作完整答案参与合并。
-- 组件映射建议只作为后续 `02-component-mapping-spec.md` 的候选证据，不得直接成为正式映射。
+主模型必须读取所有 `agent-local final`、重新核对原始输入，并生成唯一的 canonical final `ui-layout-spec.md`。不得选一份结果直接覆盖其它结果，也不得按多数票机械决定。 
+- 先按“图片/状态 + 区域语义路径 + 元素类型 + 可见文案/内容 + 相对位置”对齐语义等价项，不直接按各 agent 的 ID 比较。 
+- 多个 agent 都识别到的事实提高置信度；只有一个 agent 识别到的事实只要能从原图或需求复核，也必须进入 canonical final 或标记为 `conditional`。 
+- 对三份完整结果做证据并集，逐项交叉补齐区域、元素、状态、交互线索、样式、资产、分隔和 Open Questions。 
+- 文案、层级、位置、状态或样式冲突时，以原始输入复核为准；仍无法判断时保留不确定事实并写入 `Open Questions`。 
+- 合并 Page State Coverage，并按最终页面类型重新评估适用状态；不能把所有 agent 都未观察到某状态当作该状态不需要实现的证据。 
+- 语义对齐完成后统一生成 canonical 区域 ID 和元素 ID，并保证 Layout Wireframe、Layout Tree、UI Element Inventory、状态表和覆盖检查内部一致。 
+- 任一 agent-local final 的 Coverage Check 含 `fail` 时，先要求该 agent 修正或将其标记为无效结果；不能把失败结果当作完整答案参与合并。 
 - canonical final 必须重新执行完整 Layout Coverage Check，不能沿用任一 agent 的检查结论。
-
-当 `multiAgent.persistOutputs=true` 时，将语义对齐和取舍记录写入：
+- 如果 `multiAgent.persistOutputs=true`，将语义对齐和取舍记录写入：
 
 ```text
-.codegen/artifacts/<语义化任务名或时间戳>/ui-recognition-results/merge-notes.md
+.codegen/artifacts/<语义化任务名或时间戳>/ui-recognition-observations/layout-merge-notes.md
 ```
-
-合并说明至少记录 `agent 编号`、`agent-local ID`、`语义等价键`、`canonical ID`、`采纳/合并/拒绝决定` 和 `证据理由`。
 
 ## 输出结构
 
@@ -133,7 +117,7 @@ description: >
 ```text
 +------------------------------------------------------+
 | page-header                                          |
-| title                                      actions    |
+| title                                      actions   |
 +------------------------------------------------------+
 | filter-area                                          |
 | status-filter  date-range          query-button reset|

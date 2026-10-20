@@ -30,32 +30,29 @@
 
 1. 默认并行委派 3 个同职责 `afp-observer-agent`；如果用户显式指定数量，范围限制为 1 到 5。
 2. 每个 agent 都完整观察所有输入图片，不做分工。
-3. 每个 agent 都使用 `frontend-ui-layout-spec` 的独立完整识别模式，针对全部输入输出一份章节完整、稳定 ID、覆盖检查通过的 `agent-local final` layout spec；不得输出草案、摘要或局部清单，也不得假设其它 agent 会补漏。
-4. 把每个完整结果写入：
+3. 每个 agent 都使用 `frontend-ui-layout-spec` 的独立完整识别模式，针对全部输入输出一份完整、稳定、覆盖检查的通过 layout spec，不得假设其他agent会补漏
+4. 把完整结果写入：
 
 ```text
-.codegen/artifacts/<语义化任务名或时间戳>/ui-recognition-results/agent-<N>/01-ui-layout-spec.md
+.codegen/artifacts/<语义化任务名或时间戳>/ui-recognition-observations/agent-<N>.md
 ```
 
-   当需要组件映射建议时，另写入同一 agent 目录的 `component-mapping-suggestions.md`。
-5. 主模型读取所有完整结果并重新核对原图，按语义对齐、证据并集和冲突裁决生成唯一 canonical final `01-ui-layout-spec.md`。
+5. 主模型读取所有完整结果并重新核对原图，合并生成唯一正式 `ui-layout-spec.md`。
 6. 把合并说明写入：
 
 ```text
-.codegen/artifacts/<语义化任务名或时间戳>/ui-recognition-results/merge-notes.md
+.codegen/artifacts/<语义化任务名或时间戳>/ui-recognition-observations/merge-notes.md
 ```
 
-7. 再使用 `frontend-component-mapping-spec`，基于 canonical final layout spec、项目资产和各 agent 完整结果生成唯一正式 `02-component-mapping-spec.md`。各 agent 的组件映射建议只是候选证据，不是最终映射。
+7. 再使用 `frontend-component-mapping-spec`，基于最终 layout spec、项目资产唯一正式 `component-mapping-spec.md`。
 
 合并规则：
 
-- 先按图片/状态、区域语义路径、元素类型、可见内容和相对位置对齐等价项，不直接比较各 agent 的本地 ID。
-- 多个 agent 都识别到的区域或元素，提高置信度，但不能用多数票替代原图复核。
+- 多个 agent 都识别到的区域或元素，优先采纳。
 - 单个 agent 识别到但能从原图复核的区域或元素，也要采纳或标记为 `conditional`。
 - 文案、层级、状态或位置冲突时，以原图复核为准；仍无法判断时写入 `Open Questions`。
-- 对完整结果做证据并集，交叉补齐元素、状态、交互线索、样式、资产、分隔和 Open Questions。
-- 最终区域 ID 和元素 ID 由主模型统一生成，并在 merge notes 中记录本地 ID 到 canonical ID 的对照。
-- agent 输出的组件映射建议只是候选，不是最终 `02-component-mapping-spec.md`。
+- 最终区域 ID 和元素 ID 由主模型统一生成，不沿用冲突的临时 ID。
+- agent 输出的组件映射只是候选，不是最终 `component-mapping-spec.md`。
 
 ## 单 agent 流程
 

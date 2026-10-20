@@ -209,11 +209,9 @@ stages:
     multiAgent:
       enabled: false
       agentCount: 3
-      mode: same-role-independent-final
+      mode: same-role-observation
       persistOutputs: true
-      outputDir: ui-recognition-results
-      options:
-        includeComponentMapping: true
+      outputDir: ui-recognition-observations
     use:
       skill: frontend-ui-layout-spec
   - id: component-mapping-spec

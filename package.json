@@ -1,17 +1,17 @@
 {
   "name": "@cmbc/apollo-flowpower",
-  "version": "0.1.0",
+  "version": "0.9.0-beta.7",
   "type": "module",
   "private": false,
   "main": "dist/index.js",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     },
     "./server": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     },
     "./dsh": {
       "types": "./dist/dsh.d.ts",
@@ -20,6 +20,7 @@
     }
   },
   "files": [
+    ".lingma",
     "dist",
     "src",
     "agents",
@@ -30,13 +31,14 @@
     "APOLLO-FLOWPOWER-GUIDE.md",
     "DESIGN.md",
     "USAGE.md",
-    "README.md"
+    "README.md",
+    "copy.js"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepare": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "npm run build && node --test src/tests/*.test.mjs"
+    "postinstall": "node copy.js"
   },
   "dependencies": {
     "@opencode-ai/plugin": "^1.14.50",

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Frontend UI Vision Spec"
-  short_description: "从 UI 图片或需求提取证据并创建、更新可机器验收的布局规格"
-  default_prompt: "Use $frontend-ui-vision-spec to analyze these UI screenshots or requirements and create or update a verified layout specification."

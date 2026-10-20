@@ -2,11 +2,20 @@ id: screenshot-to-page
 name: 截图生成页面
 description: 根据截图或视觉参考生成、还原或更新前端页面。
 notes:
+  - 必须基于当前对话里的图片附件和用户原始需求把完整 spec 写入： `.codegen/artifacts/<语义化任务名或时间>`
   - 在布局说明规格文档、组件映射规格文档和生码计划规格文档都可用之前，不要开始生码。
   - 任一规格文档存在阻塞性开放问题时，停止流程并询问用户。
   - 用户提供多张图片时，默认视为同一页面的不同状态，除非用户明确说明它们是不同页面。
   - UI 识别前必须读取当前 stage 的 multiAgent 策略，并严格遵守。
   - 除非参考图和 DOM 截图都能提供给 subagent，否则 UI 视觉审查保留在主模型执行。
+  - 代码写入用户指定目录；若未指定目录，在 `src/pages` 下新建语义化 kebab-case 目录。
+  - 页面最外层可见根节点必须添加唯一 `id`。
+  - 代码生成阶段必须返回：targetDir、route、rootDomId
+  - 若用户未提供接口文档，接口补充阶段标记为 `skipped`。
+  - 检查顺序固定为：lint → boot → runtime
+  - 图片生码必须在 runtime 后执行 UI 视觉对比。
+  - 如果 UI 对比发现明显偏差，修复后重新执行 runtime 检查和 UI 对比。
+  - 只需要给本次生码的page和view文件生成单测，如果本次生成components目录，则也需要生层单测
 match:
   intents:
     - screenshot-codegen
@@ -23,27 +32,32 @@ artifacts:
     runtimeScreenshot: runtime-dom.png
 stages:
   - id: clarify-target
-    instruction: 生成文件前，先从用户需求或项目上下文中确认目标目录、路由和 rootDomId。
+    instruction: 确定产物目录.
+    output: artifacts
   - id: context
     instruction: 读取和当前截图生码任务相关的项目资产、目标目录、同类页面、组件库约定和已有实现模式，只返回任务相关事实。
     use:
       subagent: afp-context-agent
   - id: ui-layout-spec
-    instruction: 先读取和当前阶段相关的项目资产。如果本阶段 multiAgent.enabled=true，必须让多个同职责 agent 同时针对全部图片各自生成一份可独立验收、覆盖检查通过的完整布局说明规格文档，再由主模型做语义对齐、交叉补缺和冲突裁决，生成唯一 canonical final；不得让子 agent 输出草案或按区域分工。否则直接生成一份布局说明规格文档。
+    instruction:  如果本阶段 multiAgent.enabled=true，必须把图片地址交给多个同职责但上下文完全独立的 agent 同时观察所有图片生成布局说明文档并放置在指定目录下，并委派一个子agent合并成唯一布局说明规格文档；否则直接生成一份布局说明规格文档。
     multiAgent:
-      enabled: false
+      enabled: true
       agentCount: 3
-      mode: same-role-independent-final
+      mode: same-role-observation
       persistOutputs: true
-      outputDir: ui-recognition-results
-      options:
-        includeComponentMapping: true
+      outputDir: ui-recognition-observations
     use:
       subagent: afp-observer-agent
       skill: frontend-ui-layout-spec
     output: artifacts.layoutSpec
   - id: component-mapping-spec
-    instruction: 如果存在多 agent 独立完整识别结果，只能把其中的组件映射建议作为候选证据；最终组件映射必须以 canonical final 布局说明规格文档元素 ID 为准。
+    instruction: 如果本阶段 multiAgent.enabled=true，必须把图片地址交给多个同职责但上下文完全独立的 agent 同时观察所有图片生成组件映射规格文档并放置在指定目录下。并委派一个子agent合并成唯一组件映射规格文档；否则直接生成一份组件映射规格文档。
+    multiAgent:
+      enabled: true
+      agentCount: 3
+      mode: same-role-observation
+      persistOutputs: true
+      outputDir: ui-recognition-observations
     use:
       subagent: afp-planner-agent
       skill: frontend-component-mapping-spec
@@ -51,6 +65,7 @@ stages:
       - artifacts.layoutSpec
     output: artifacts.componentMappingSpec
   - id: codegen-plan
+    instruction: 生成生码计划
     use:
       subagent: afp-planner-agent
       skill: frontend-codegen-plan
@@ -59,6 +74,7 @@ stages:
       - artifacts.componentMappingSpec
     output: artifacts.codegenPlanSpec
   - id: codegen
+    instruction: 严格按 codegenPlanSpec、layoutSpec、componentMappingSpec 生成代码
     use:
       subagent: afp-builder-agent
       skill: frontend-ui-codegen
@@ -66,28 +82,45 @@ stages:
       - artifacts.layoutSpec
       - artifacts.componentMappingSpec
       - artifacts.codegenPlanSpec
+    output: route、rootDomId
+  - id: api
+    instruction: 接口逻辑补充
+    use:
+      subagent: afp-builder-agent
+      skill: frontend-api-integration
+    requires:
+      - 接口文档
   - id: lint
+    instruction: lint 检查
     use:
       subagent: afp-verifier-agent
       skill: frontend-lint-check
     onFail: fix-and-retry
     maxRetries: 3
   - id: boot
+    instruction: boot 检查  
     use:
       subagent: afp-verifier-agent
       skill: frontend-boot-check
     onFail: fix-and-retry
     maxRetries: 3
   - id: runtime
+    instruction: runtime 检查
     use:
       subagent: afp-verifier-agent
       skill: frontend-runtime-check
     onFail: fix-and-retry
     maxRetries: 3
   - id: ui-review
+    instruction: UI 视觉对比
     use:
       subagent: afp-review-agent
       skill: frontend-ui-review
     when: 存在参考图或用户明确要求视觉还原审查
+  - id: unit-test
+    instruction: 单元测试生成
+    use:
+      subagent: afp-builder-agent
+      skill: fontend-unit-test-rule、cmbc-apollo-test-generator
   - id: final-summary
     instruction: 总结修改文件、验证结果，以及剩余视觉或功能风险。

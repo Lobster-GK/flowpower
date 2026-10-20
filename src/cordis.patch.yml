@@ -1,6 +1,6 @@
 # Install into a base-backed Harness profile (web/headless/sdk).
 - insert:
     - id: apollo-flowpower
-      name: '@cmbc/apollo-flowpower/dsh'
+      name: @cmbc/apollo-flowpower/dsh
       config:
         subagentProvider: spawn

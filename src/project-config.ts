@@ -37,6 +37,8 @@ type ProjectConfigResult = {
   schemaVersion?: number;
   subagents: ProjectSubagentConfig[];
   assets: ProjectAsset[];
+  username?: string | unknown;
+  password?: string | unknown;
   errors: string[];
 };
 
@@ -79,9 +81,11 @@ function defaultProjectConfig(): string {
     "# Apollo Flowpower 项目配置",
     "# 后续插件级项目配置都收敛到这个文件。",
     "schemaVersion: 1",
+    "username: ",
+    "password: ",
     ...defaultSubagentConfigLines(),
     "",
-    "assets: []",
+    "assets: ",
     "",
     "# 示例:",
     "# assets:",
@@ -321,6 +325,8 @@ function loadProjectConfigInternal(directory: string): {
   schemaVersion?: number;
   subagents: ProjectSubagentConfig[];
   assets: ProjectAsset[];
+  username?: string | unknown;
+  password?: string | unknown;
   errors: string[];
 } {
   const createdConfig = ensureProjectConfig(directory);
@@ -330,6 +336,8 @@ function loadProjectConfigInternal(directory: string): {
   const errors: string[] = [];
   const defaultSubagents = defaultSubagentConfigs();
   const assets: ProjectAsset[] = [];
+  let username: string | unknown;
+  let password: string | unknown;
 
   let parsed: unknown;
   try {
@@ -366,6 +374,8 @@ function loadProjectConfigInternal(directory: string): {
 
   // assets 是项目资产配置段；后续配置继续挂在同一个 config.yaml。
   const rawAssets = parsed.assets;
+  username = parsed.username
+  password = parsed.password
   if (rawAssets !== undefined && !Array.isArray(rawAssets)) {
     errors.push(`${configPath}: assets must be an array`);
   }
@@ -422,6 +432,8 @@ function loadProjectConfigInternal(directory: string): {
     schemaVersion,
     subagents,
     assets,
+    username,
+    password,
     errors,
   };
 }

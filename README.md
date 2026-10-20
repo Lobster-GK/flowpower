@@ -1,7 +1,5 @@
 # apollo-flowpower
 
-现已提供 DeepSeek Harness 双平台适配入口 `apollo-flowpower/dsh`，安装、模型映射与兼容范围见 [Harness 使用说明](src/DSH.md)。
-
 `apollo-flowpower` 是一个面向 OpenCode 的前端 AI 开发流程插件。它通过显式命令进入场景编排，把前端生码拆成可编辑场景模板、能力型 skill、默认 subagent 和项目级配置。
 
 插件提供：
@@ -176,11 +174,9 @@ stages:
     multiAgent:
       enabled: false
       agentCount: 3
-      mode: same-role-independent-final
+      mode: same-role-observation
       persistOutputs: true
-      outputDir: ui-recognition-results
-      options:
-        includeComponentMapping: true
+      outputDir: ui-recognition-observations
 ```
 
 ## 能力说明

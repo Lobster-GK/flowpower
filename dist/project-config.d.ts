@@ -28,6 +28,8 @@ type ProjectConfigResult = {
     schemaVersion?: number;
     subagents: ProjectSubagentConfig[];
     assets: ProjectAsset[];
+    username?: string | unknown;
+    password?: string | unknown;
     errors: string[];
 };
 /**

@@ -33,9 +33,11 @@ function defaultProjectConfig() {
         "# Apollo Flowpower 项目配置",
         "# 后续插件级项目配置都收敛到这个文件。",
         "schemaVersion: 1",
+        "username: ",
+        "password: ",
         ...defaultSubagentConfigLines(),
         "",
-        "assets: []",
+        "assets: ",
         "",
         "# 示例:",
         "# assets:",
@@ -250,6 +252,8 @@ function loadProjectConfigInternal(directory) {
     const errors = [];
     const defaultSubagents = defaultSubagentConfigs();
     const assets = [];
+    let username;
+    let password;
     let parsed;
     try {
         parsed = parse(readFileSync(configFile, "utf8"));
@@ -283,6 +287,8 @@ function loadProjectConfigInternal(directory) {
     const subagents = parseSubagentConfigs(configPath, parsed.subagents, errors);
     // assets 是项目资产配置段；后续配置继续挂在同一个 config.yaml。
     const rawAssets = parsed.assets;
+    username = parsed.username;
+    password = parsed.password;
     if (rawAssets !== undefined && !Array.isArray(rawAssets)) {
         errors.push(`${configPath}: assets must be an array`);
     }
@@ -336,6 +342,8 @@ function loadProjectConfigInternal(directory) {
         schemaVersion,
         subagents,
         assets,
+        username,
+        password,
         errors,
     };
 }

@@ -1,0 +1,65 @@
+id: dsl-to-page
+name: dsl to page
+description: 根据用户提供的莫高DSL文件生成代码.
+notes:
+  1. 使用 `mastergo-dsl-to-react` skill 生成页面代码文件。
+  2. 生码必须严格遵循 `mastergo-dsl-to-react` skill 生成产物 和 cmbc-apollo-code-generator skill 中的框架规范，最终要生成符合框架规范的目录和代码。
+  3. 代码写入用户指定目录；若未指定目录，在 `src/pages` 下新建语义化 kebab-case 目录。
+  4. 页面最外层可见根节点必须添加唯一 `id`。
+  5. 代码生成阶段必须返回：route、rootDomId
+  6. 若用户未提供接口文档，接口补充阶段标记为 `skipped`。
+  7. 检查顺序固定为：lint → boot → runtime
+  8. 任一检查失败，必须 `fix-from-error` 修复后重跑同一检查阶段。
+  9. 只需要给本次生码的page和view文件生成单测，如果本次生成components目录，则也需要生层单测
+match:
+  intents:
+    - dsl-codegen
+  requires:
+    - dsl文件
+artifacts:
+  root: .codegen/artifacts/{{taskId}}
+stages:
+  - id: codegen
+    instruction: 按DSL生成代码文件
+    use:
+      subagent: afp-builder-agent
+      skill: mastergo-dsl-to-react
+    requires:
+      - dsl文件
+    outpurt: route、rootDomId
+  - id: api
+    instruction: 接口逻辑补充
+    use:
+      subagent: afp-builder-agent
+      skill: frontend-api-integration
+    requires:
+      - 接口文档
+  - id: lint
+    instruction: lint 检查
+    use:
+      subagent: afp-verifier-agent
+      skill: frontend-lint-check
+    onFail: fix-and-retry
+    maxRetries: 10
+  - id: boot
+    instruction: boot 检查  
+    use:
+      subagent: afp-verifier-agent
+      skill: frontend-boot-check
+    onFail: fix-and-retry
+    maxRetries: 5
+  - id: runtime
+    instruction: runtime 检查
+    use:
+      subagent: afp-verifier-agent
+      skill: frontend-runtime-check
+    onFail: fix-and-retry
+    maxRetries: 5
+  - id: unit-test
+    instruction: 单元测试生成
+    use:
+      subagent: afp-builder-agent
+      skill: fontend-unit-test-rule、cmbc-apollo-test-generator
+  - id: final-summary
+    instruction: 最终总结
+    output: 总结

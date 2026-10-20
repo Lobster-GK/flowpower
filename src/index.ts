@@ -5,6 +5,7 @@ import { registerDefaultSubagents } from "./agents.js";
 import { packageRoot } from "./config.js";
 import { AFP_TOOL_DESCRIPTIONS, executeAfpTool, initializeProject } from "./core-tools.js";
 import { shouldSyncBuiltinResources, syncBuiltinResources } from "./sync.js";
+import { buildBootstrapPrompt } from "./bootstrap.js";
 
 /**
  * 无参工具的宽松参数定义。
@@ -49,13 +50,13 @@ function projectSkillExists(projectSkillsRoot: string, skillName: string): boole
 /**
  * 如果项目已经完整同步过内置 skills，就不再把包内 skills 路径追加到配置中。
  */
-function projectHasAllBundledSkills(directory: string, skillsRoot: string): boolean {
-  const names = bundledSkillNames(skillsRoot);
-  if (names.length === 0) return false;
+// function projectHasAllBundledSkills(directory: string, skillsRoot: string): boolean {
+//   const names = bundledSkillNames(skillsRoot);
+//   if (names.length === 0) return false;
 
-  const projectSkillsRoot = join(directory, ".opencode", "skills");
-  return names.every((name) => projectSkillExists(projectSkillsRoot, name));
-}
+//   const projectSkillsRoot = join(directory, ".opencode", "skills");
+//   return names.every((name) => projectSkillExists(projectSkillsRoot, name));
+// }
 
 /**
  * OpenCode 插件入口。
@@ -66,9 +67,9 @@ function projectHasAllBundledSkills(directory: string, skillsRoot: string): bool
 export const ApolloFlowpower: Plugin = async (ctx) => {
   initializeProject(ctx.directory);
 
-  if (shouldSyncBuiltinResources(ctx.directory)) {
+  // if (shouldSyncBuiltinResources(ctx.directory)) {
     syncBuiltinResources(ctx.directory);
-  }
+  // }
 
   return {
     tool: {
@@ -105,16 +106,25 @@ export const ApolloFlowpower: Plugin = async (ctx) => {
     config: async (config: Record<string, unknown>) => {
       const skillsRoot = `${packageRoot()}/skills`;
 
-      if (!projectHasAllBundledSkills(ctx.directory, skillsRoot)) {
+      // if (!projectHasAllBundledSkills(ctx.directory, skillsRoot)) {
         const currentSkills = (config.skills ?? {}) as Record<string, unknown>;
         const currentPaths = Array.isArray(currentSkills.paths) ? currentSkills.paths : [];
         if (!currentPaths.includes(skillsRoot)) {
           currentSkills.paths = [...currentPaths, skillsRoot];
         }
         config.skills = currentSkills;
-      }
+      // }
 
       registerDefaultSubagents(config, ctx.directory);
+    },
+
+    /**
+     * 在对话消息进入模型前补一段预制系统提示词。
+     */
+    "experimental.chat.system.transform": async (_input: unknown, output: { system: string[]; }) => {
+      const original = output.system[0] ?? '';
+      const bootstrap: string = buildBootstrapPrompt()
+      output.system[0] = [original, bootstrap].join('\n\n')
     },
   };
 };

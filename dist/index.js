@@ -4,7 +4,8 @@ import { join } from "node:path";
 import { registerDefaultSubagents } from "./agents.js";
 import { packageRoot } from "./config.js";
 import { AFP_TOOL_DESCRIPTIONS, executeAfpTool, initializeProject } from "./core-tools.js";
-import { shouldSyncBuiltinResources, syncBuiltinResources } from "./sync.js";
+import { syncBuiltinResources } from "./sync.js";
+import { buildBootstrapPrompt } from "./bootstrap.js";
 /**
  * 无参工具的宽松参数定义。
  *
@@ -45,13 +46,12 @@ function projectSkillExists(projectSkillsRoot, skillName) {
 /**
  * 如果项目已经完整同步过内置 skills，就不再把包内 skills 路径追加到配置中。
  */
-function projectHasAllBundledSkills(directory, skillsRoot) {
-    const names = bundledSkillNames(skillsRoot);
-    if (names.length === 0)
-        return false;
-    const projectSkillsRoot = join(directory, ".opencode", "skills");
-    return names.every((name) => projectSkillExists(projectSkillsRoot, name));
-}
+// function projectHasAllBundledSkills(directory: string, skillsRoot: string): boolean {
+//   const names = bundledSkillNames(skillsRoot);
+//   if (names.length === 0) return false;
+//   const projectSkillsRoot = join(directory, ".opencode", "skills");
+//   return names.every((name) => projectSkillExists(projectSkillsRoot, name));
+// }
 /**
  * OpenCode 插件入口。
  *
@@ -60,9 +60,9 @@ function projectHasAllBundledSkills(directory, skillsRoot) {
  */
 export const ApolloFlowpower = async (ctx) => {
     initializeProject(ctx.directory);
-    if (shouldSyncBuiltinResources(ctx.directory)) {
-        syncBuiltinResources(ctx.directory);
-    }
+    // if (shouldSyncBuiltinResources(ctx.directory)) {
+    syncBuiltinResources(ctx.directory);
+    // }
     return {
         tool: {
             afp_list_scenes: tool({
@@ -96,15 +96,23 @@ export const ApolloFlowpower = async (ctx) => {
         },
         config: async (config) => {
             const skillsRoot = `${packageRoot()}/skills`;
-            if (!projectHasAllBundledSkills(ctx.directory, skillsRoot)) {
-                const currentSkills = (config.skills ?? {});
-                const currentPaths = Array.isArray(currentSkills.paths) ? currentSkills.paths : [];
-                if (!currentPaths.includes(skillsRoot)) {
-                    currentSkills.paths = [...currentPaths, skillsRoot];
-                }
-                config.skills = currentSkills;
+            // if (!projectHasAllBundledSkills(ctx.directory, skillsRoot)) {
+            const currentSkills = (config.skills ?? {});
+            const currentPaths = Array.isArray(currentSkills.paths) ? currentSkills.paths : [];
+            if (!currentPaths.includes(skillsRoot)) {
+                currentSkills.paths = [...currentPaths, skillsRoot];
             }
+            config.skills = currentSkills;
+            // }
             registerDefaultSubagents(config, ctx.directory);
+        },
+        /**
+         * 在对话消息进入模型前补一段预制系统提示词。
+         */
+        "experimental.chat.system.transform": async (_input, output) => {
+            const original = output.system[0] ?? '';
+            const bootstrap = buildBootstrapPrompt();
+            output.system[0] = [original, bootstrap].join('\n\n');
         },
     };
 };
