@@ -1,0 +1,130 @@
+---
+name: frontend-ui-codegen
+description: >
+  根据持久化 `03-codegen-plan-spec.md` 实施 React 18 + TypeScript + Vite 前端代码生成或修改。用于在 codegen plan 已明确任务类型、File Plan、
+  Implementation Steps、目标文件和验证方式后，按计划实现新页面/新组件、现有功能变更、新增需求、小范围重构，或根因与修复路径已明确的
+  前端 bug 修复。新 UI/大幅 UI 变更还必须读取 `01-ui-layout-spec.md` 和 `02-component-mapping-spec.md`；已有功能变更优先遵守现有代码和计划边界。
+  不用于截图分析、布局说明、组件映射、生成生码计划、后端代码、API 设计、独立错误排查、lint 修复、运行时调试，或绕过 plan/spec 发明 UI、字段、
+  交互、接口参数、业务数据和额外重构。
+---
+
+# 计划转代码
+
+严格根据输入规格和生码计划生成或修改 React 18 + TypeScript + Vite 代码。本 skill 的产物是前端代码文件；不要在本 skill 内继续 API 集成、lint、启动、运行时检查或 UI review。
+
+## 输入读取规则
+
+优先读取：
+
+```text
+.codegen/artifacts/<语义化任务名或时间戳>/03-codegen-plan-spec.md
+```
+
+如果用户指定其它计划路径，以用户指定路径为准。计划缺失时停止并要求先生成 `03-codegen-plan-spec.md`，不要临时猜测文件结构和修改范围。
+
+根据计划中的任务类型读取额外输入：
+
+- `new-ui` 或大幅 UI 变更：必须读取 `01-ui-layout-spec.md` 和 `02-component-mapping-spec.md`。
+- `change-existing`、`new-requirement`、`refactor-small`：读取计划 File Plan 中列出的现有代码、项目资产和相关 spec；只有计划要求 UI 契约时才强制读取 layout/component mapping spec。
+- `bug-fix`：读取计划列出的错误证据、复现步骤、相关文件和验证方式；如果计划还没有根因或明确修复路径，停止并建议先使用分析/修复流程，不要盲改。
+
+在 Apollo Flowpower 场景流程中，如果 scene 明确声明某些前置产物为当前 stage 的 `requires`，必须遵守 scene；否则按计划任务类型判断是否需要 UI specs。
+
+## 优先级
+
+实现时按以下优先级执行：
+
+1. 用户最新明确指令。
+2. scene YAML 阶段顺序、当前 stage 要求和 `requires`。
+3. `03-codegen-plan-spec.md` 的任务类型、File Plan、Implementation Steps、契约和验证计划。
+4. File Plan 中列出的现有代码和错误证据。
+5. 适用时，`02-component-mapping-spec.md` 的组件映射与属性归属。
+6. 适用时，`01-ui-layout-spec.md` 的布局、元素盘点和视觉约束。
+7. 项目资产中的组件库规范和项目开发规范。
+8. 最小中性默认值。
+
+UI 任务不得为了“看起来更像”破坏组件映射与属性归属。改造和修复任务不得为了“顺手整理”扩大计划范围。
+
+## 输出格式
+
+- 只输出或修改实际文件代码。
+- 如果用户指定了生码目录，所有本次页面/组件代码必须落在该目录中。
+- 如果用户没有指定生码目录，按 `03-codegen-plan-spec.md` 的 File Plan 执行。
+- 新页面或新可见根组件的最外层可见根节点必须添加稳定、唯一、语义化的 `id`，用于后续浏览器定位和 DOM 截图。
+- 现有功能变更和 bug 修复应保持既有公开 API、路由、状态形状和样式入口，除非计划明确要求修改。
+- UI 文案、代码注释和产物说明默认使用中文；代码标识符、文件路径、API 字段和 JSON key 保持英文。
+
+## 事实来源
+
+- `03-codegen-plan-spec.md` 是文件组织、实施步骤、修改范围、状态管理、样式策略和验证方式的持久化执行计划。
+- 现有代码是 `change-existing`、`bug-fix`、`new-requirement` 和 `refactor-small` 的当前行为事实来源。
+- `02-component-mapping-spec.md` 是新 UI 或大幅 UI 变更中组件、props、slot、children、数据归属、交互归属和状态归属的最高优先级事实来源。
+- `01-ui-layout-spec.md` 是新 UI 或大幅 UI 变更中区域层级、Layout Wireframe、元素盘点、布局关系和视觉约束的事实来源。
+- 禁止添加 spec/plan 中不存在的区块、文案、字段、控件、交互、接口参数或业务数据。
+- 如果用户新补充信息与 spec/plan 冲突，先说明冲突并要求更新 spec/plan，不能静默改写。
+
+## 生码前自查
+
+写代码前，先在内部确认：
+
+- `03-codegen-plan-spec.md` 存在且可读。
+- 任务类型、目标范围、File Plan 和 Implementation Steps 明确。
+- 每个计划步骤都有目标文件、输入和输出。
+- `new-ui` 或大幅 UI 变更中，component mapping 覆盖验证通过，且没有阻塞性 Open Questions。
+- `new-ui` 或大幅 UI 变更中，每个必须实现的元素 ID 都能落到目标文件或组件。
+- `bug-fix` 中，计划已经给出根因、可执行诊断步骤或明确修复路径；没有证据时不得直接猜修复。
+- 目标目录、route、rootDomId 或目标文件定位明确。
+
+任一阻塞项不满足时停止并报告。
+
+## 组件实现规则
+
+当本次任务涉及 component mapping spec 时：
+
+- 必须按组件映射中的 `组件/承载者`、`导入来源`、`属性归属`、`数据归属`、`交互归属`、`状态/校验归属`、`样式/token 归属` 实现。
+- 组件映射已指定组件时，不得替换成其它组件。
+- 组件映射已指定本地封装组件和导入来源时，必须使用该组件和导入来源。
+- UI 库组件有语义 API 时，必须使用语义 API，例如 `label`、`title`、`extra`、`footer`、`help`、`status`、`columns`、`rowSelection`、`pagination`、`options`、`items`、`treeData`。
+- 不得用 `div`、`span`、`Typography.Text` 或自定义 CSS 绕过组件语义 API 拼外观。
+- 表单标签必须通过 `Form.Item label` 或项目等价 API 生成。
+- 表格列必须来自映射表中的 `Table.columns[]` 约定；默认不生成 `columns.width`，除非 spec 明确要求。
+
+不涉及 component mapping spec 的已有功能变更，应优先保持现有组件选择和项目约定。
+
+## 布局和样式规则
+
+当本次任务涉及 layout spec 时：
+
+- 严格实现 layout spec 中的区域层级、排列方向、横向位置、分隔结构和必须实现元素。
+- Layout Wireframe 用于约束主要区域和关键元素的相对位置；不得把上下结构写成左右结构，或把主次区域关系反转。
+- 视觉细节按硬约束、中约束、软约束分级处理；软约束可以留给后续多轮视觉微调。
+- `divider-zone` 和 `divider-line` 不得遗漏。
+- 固定格式 UI 元素要有稳定尺寸约束，避免 hover、加载文本、按钮文字或动态内容导致布局跳动。
+
+局部样式变更只修改计划声明的样式入口，不要顺手重写整页视觉体系。
+
+## 数据和交互边界
+
+- 没有接口文档时，不发明请求参数、响应字段或真实业务数据。
+- 表格行、下拉 options、树节点、分页总数等默认使用空数据或最小占位，除非现有代码或计划已有数据来源。
+- 交互只实现映射表和计划中声明的 UI 入口；业务逻辑或真实接口交给后续 API 集成阶段。
+- bug 修复只改动和根因直接相关的状态、数据流、边界判断或渲染条件。
+
+## 参考代码边界
+
+- 优先读取并遵守 File Plan 中列出的文件。
+- 用户未明确指定参考目录、参考页面或参考文件时，严禁自动扫描、复制、复用、仿写或迁移无关业务页面代码。
+- 可以读取当前目标目录、项目级配置、package/lockfile、组件库识别信息和用户明确指定的参考路径。
+- 如果参考页面实现与 spec/plan 冲突，停止并报告冲突，不要静默替换规格内容。
+
+## 生码后自查
+
+代码生成或修改后，输出简短自查结果：
+
+- 生码计划中的文件和步骤是否完成。
+- 新 UI 或大幅 UI 变更中，每个必须实现元素 ID 是否落地。
+- 组件映射与属性归属是否落实；不适用时说明原因。
+- bug 修复或功能变更中，需求/错误点是否映射到目标文件并完成。
+- 哪些视觉软约束、需求细节或验证项留待后续处理。
+
+后续验证由 scene 中的 lint、boot、runtime、ui-review 阶段或用户指定命令决定。

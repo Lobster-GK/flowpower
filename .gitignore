@@ -1,0 +1,11 @@
+node_modules/
+.npm-cache/
+.codex/
+.opencode/
+.tmp-skill-validation/
+artifacts/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.log

@@ -1,0 +1,34 @@
+{
+  "kind": "visual-run-state",
+  "schemaVersion": "1.0",
+  "phase": "generation",
+  "iteration": 0,
+  "artifactRoot": ".",
+  "profile": "component-faithful",
+  "artifacts": {
+    "reference": "reference.png",
+    "sourceManifest": "00-source-manifest.json",
+    "visualContract": "01-visual-contract.json",
+    "renderPlan": "02-component-adaptation.json",
+    "acceptancePolicy": "visual-acceptance-policy.json",
+    "visualLab": "visual-lab",
+    "visualLabLock": "visual-lab-lock.json",
+    "alignmentReport": null,
+    "pixelReport": null,
+    "visualEvaluation": null,
+    "iterationDelta": null
+  },
+  "digests": {},
+  "activeTargets": [],
+  "gates": {
+    "visualLab": "pending",
+    "alignment": "pending",
+    "visualEvaluation": "pending"
+  },
+  "budget": {
+    "maximumTextTokens": 16000,
+    "maximumImages": 3,
+    "maximumTargets": 60
+  },
+  "nextAction": "generate-visual-lab-ui"
+}

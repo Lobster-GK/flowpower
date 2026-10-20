@@ -1,0 +1,65 @@
+{
+  "kind": "capture-observation",
+  "schemaVersion": "1.0",
+  "actual": {
+    "path": "iterations/iteration-00/actual.png",
+    "debugViewportScreenshot": "iterations/iteration-00/debug-viewport.png",
+    "captureMode": "locator",
+    "selector": "[data-visual-id='page-root']",
+    "box": "border-box",
+    "bboxInViewport": { "x": 0, "y": 0, "width": 1200, "height": 800 },
+    "canvasWidth": 1200,
+    "canvasHeight": 800,
+    "viewport": { "width": 1200, "height": 800 },
+    "dpr": 1,
+    "applicationShellPresent": false
+  },
+  "readiness": {
+    "targetResolved": true,
+    "originNormalized": true,
+    "cropMatched": true,
+    "stateMatched": true,
+    "fontsReady": true,
+    "assetsReady": true
+  },
+  "visualLabReadiness": {
+    "labId": "replace-with-task-id",
+    "lockSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "readyMarker": true,
+    "captureModeEnabled": true,
+    "externalNetworkRequests": []
+  },
+  "measurementSpace": {
+    "origin": "comparison-canvas",
+    "units": "image-px",
+    "dprApplied": true
+  },
+  "visualMeasurements": [
+    {
+      "id": "page-root",
+      "type": "region",
+      "selector": "[data-visual-id='page-root']",
+      "present": true,
+      "visible": true,
+      "contentMatched": true,
+      "stateMatched": true,
+      "state": "default",
+      "bbox": { "x": 0, "y": 0, "width": 1200, "height": 800 },
+      "overflow": { "x": false, "y": false, "clipped": false },
+      "occlusion": { "ratio": 0, "blockers": [] },
+      "computedStyle": {
+        "fontFamily": "Arial, Microsoft YaHei, sans-serif",
+        "fontSize": 14,
+        "fontWeight": 400,
+        "lineHeight": 22,
+        "letterSpacing": 0,
+        "color": "rgb(31, 35, 41)",
+        "backgroundColor": "rgb(245, 246, 248)",
+        "borderRadius": 0
+      }
+    }
+  ],
+  "anchors": [],
+  "captureOnlyMutations": [],
+  "blockers": []
+}

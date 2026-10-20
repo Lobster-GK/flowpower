@@ -1,0 +1,26 @@
+{
+  "kind": "visual-lab-lock",
+  "schemaVersion": "1.0",
+  "labId": "replace-with-task-id",
+  "executionScope": "sandbox-only",
+  "manifest": "visual-lab.json",
+  "fixture": {
+    "path": "src/visual-fixture.json",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "files": [
+    {
+      "path": "src/generated-ui.js",
+      "bytes": 1,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "networkAccessVerifiedForbidden": true,
+  "boundary": {
+    "targetProjectRead": false,
+    "targetProjectModified": false,
+    "migrationIncluded": false,
+    "integrationValidationIncluded": false
+  },
+  "status": "sealed"
+}

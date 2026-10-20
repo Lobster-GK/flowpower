@@ -1,0 +1,85 @@
+id: text-to-page
+name: 文本生成页面
+description: 根据文字产品需求或 UI 需求生成前端页面。
+notes:
+  - 根据文字需求生成布局说明规格文档；除非用户提供图片，否则不要执行图片分析。
+  - 如果用户同时提供多张图片，默认视为同一页面的不同状态，除非用户明确说明它们是不同页面。
+  - UI 识别前必须读取当前 stage 的 multiAgent 策略，并严格遵守。
+  - 在布局说明规格文档、组件映射规格文档和生码计划规格文档都可用之前，不要开始生码。
+  - 如果用户没有指定 targetDir，选择语义明确的 kebab-case 页面目录。
+match:
+  intents:
+    - text-codegen
+    - create-page
+    - generate-page
+artifacts:
+  root: .codegen/artifacts/{{taskId}}
+  files:
+    layoutSpec: 01-ui-layout-spec.md
+    componentMappingSpec: 02-component-mapping-spec.md
+    codegenPlanSpec: 03-codegen-plan-spec.md
+stages:
+  - id: clarify-target
+    instruction: 生成文件前，先从用户需求或项目上下文中确认目标目录、路由和 rootDomId。
+  - id: context
+    instruction: 读取和当前文字生码任务相关的项目资产、目标目录、同类页面、组件库约定和已有实现模式，只返回任务相关事实。
+    use:
+      subagent: afp-context-agent
+  - id: ui-layout-spec
+    instruction: 先读取和当前阶段相关的项目资产。如果本阶段 multiAgent.enabled=true，必须让多个同职责 agent 同时针对全部文字/图片输入各自生成一份可独立验收、覆盖检查通过的完整布局说明规格文档，再由主模型做语义对齐、交叉补缺和冲突裁决，生成唯一 canonical final；不得让子 agent 输出草案或按区域分工。否则直接生成一份布局说明规格文档。
+    multiAgent:
+      enabled: false
+      agentCount: 3
+      mode: same-role-independent-final
+      persistOutputs: true
+      outputDir: ui-recognition-results
+      options:
+        includeComponentMapping: true
+    use:
+      subagent: afp-observer-agent
+      skill: frontend-ui-layout-spec
+    output: artifacts.layoutSpec
+  - id: component-mapping-spec
+    instruction: 如果存在多 agent 独立完整识别结果，只能把其中的组件映射建议作为候选证据；最终组件映射必须以 canonical final 布局说明规格文档元素 ID 为准。
+    use:
+      subagent: afp-planner-agent
+      skill: frontend-component-mapping-spec
+    requires:
+      - artifacts.layoutSpec
+    output: artifacts.componentMappingSpec
+  - id: codegen-plan
+    use:
+      subagent: afp-planner-agent
+      skill: frontend-codegen-plan
+    requires:
+      - artifacts.layoutSpec
+      - artifacts.componentMappingSpec
+    output: artifacts.codegenPlanSpec
+  - id: codegen
+    use:
+      subagent: afp-builder-agent
+      skill: frontend-ui-codegen
+    requires:
+      - artifacts.layoutSpec
+      - artifacts.componentMappingSpec
+      - artifacts.codegenPlanSpec
+  - id: lint
+    use:
+      subagent: afp-verifier-agent
+      skill: frontend-lint-check
+    onFail: fix-and-retry
+    maxRetries: 3
+  - id: boot
+    use:
+      subagent: afp-verifier-agent
+      skill: frontend-boot-check
+    onFail: fix-and-retry
+    maxRetries: 3
+  - id: runtime
+    use:
+      subagent: afp-verifier-agent
+      skill: frontend-runtime-check
+    onFail: fix-and-retry
+    maxRetries: 3
+  - id: final-summary
+    instruction: 总结修改文件、验证结果和剩余风险。

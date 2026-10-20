@@ -1,0 +1,136 @@
+{
+  "kind": "visual-acceptance-policy",
+  "schemaVersion": "1.0",
+  "activeProfile": "component-faithful",
+  "profiles": {
+    "structure-faithful": {
+      "description": "用于低保真原型；结构、元素和状态正确优先，图像差异仅用于诊断。",
+      "geometry": {
+        "positionTolerancePx": 6,
+        "sizeTolerancePx": 6,
+        "minimumIou": 0.82,
+        "minimumCriticalIou": 0.88
+      },
+      "typography": {
+        "enabled": false,
+        "fontSizeTolerancePx": 2,
+        "lineHeightTolerancePx": 3,
+        "fontWeightTolerance": 200
+      },
+      "perceptual": {
+        "role": "diagnostic-only",
+        "downsampleFactor": 4,
+        "minimumGlobalSimilarity": 0,
+        "minimumCriticalRegionSimilarity": 0
+      },
+      "rawPixel": {
+        "role": "diagnostic-only",
+        "threshold": 16,
+        "maximumMeanAbsoluteError": 0.035,
+        "maximumDifferentPixelRatio": 0.12,
+        "maximumCriticalRegionDifferentPixelRatio": 0.12
+      },
+      "scoring": {
+        "minimumOverall": 0.84,
+        "minimumCriticalRegion": 0.88,
+        "minimumImportantElement": 0.82,
+        "minimumNormalTarget": 0.72,
+        "weights": {
+          "geometry": 1,
+          "typography": 0,
+          "perceptual": 0,
+          "rawPixel": 0
+        }
+      }
+    },
+    "component-faithful": {
+      "description": "默认用于 UI 组件库项目；DOM 几何和完整性主判，低通感知差异辅助，原始像素差异只诊断。",
+      "geometry": {
+        "positionTolerancePx": 4,
+        "sizeTolerancePx": 4,
+        "minimumIou": 0.88,
+        "minimumCriticalIou": 0.92
+      },
+      "typography": {
+        "enabled": true,
+        "fontSizeTolerancePx": 1.5,
+        "lineHeightTolerancePx": 2,
+        "fontWeightTolerance": 100
+      },
+      "perceptual": {
+        "role": "scored",
+        "downsampleFactor": 4,
+        "minimumGlobalSimilarity": 0.82,
+        "minimumCriticalRegionSimilarity": 0.8
+      },
+      "rawPixel": {
+        "role": "diagnostic-only",
+        "threshold": 16,
+        "maximumMeanAbsoluteError": 0.035,
+        "maximumDifferentPixelRatio": 0.12,
+        "maximumCriticalRegionDifferentPixelRatio": 0.12
+      },
+      "scoring": {
+        "minimumOverall": 0.86,
+        "minimumCriticalRegion": 0.88,
+        "minimumImportantElement": 0.82,
+        "minimumNormalTarget": 0.76,
+        "weights": {
+          "geometry": 0.55,
+          "typography": 0.2,
+          "perceptual": 0.25,
+          "rawPixel": 0
+        }
+      }
+    },
+    "pixel-faithful": {
+      "description": "仅用于品牌页、定制绘制或明确要求像素复刻的区域；原始像素指标参与硬门禁。",
+      "geometry": {
+        "positionTolerancePx": 2,
+        "sizeTolerancePx": 2,
+        "minimumIou": 0.95,
+        "minimumCriticalIou": 0.97
+      },
+      "typography": {
+        "enabled": true,
+        "fontSizeTolerancePx": 1,
+        "lineHeightTolerancePx": 1,
+        "fontWeightTolerance": 100
+      },
+      "perceptual": {
+        "role": "hard-gate",
+        "downsampleFactor": 2,
+        "minimumGlobalSimilarity": 0.94,
+        "minimumCriticalRegionSimilarity": 0.94
+      },
+      "rawPixel": {
+        "role": "hard-gate",
+        "threshold": 16,
+        "maximumMeanAbsoluteError": 0.035,
+        "maximumDifferentPixelRatio": 0.12,
+        "maximumCriticalRegionDifferentPixelRatio": 0.12
+      },
+      "scoring": {
+        "minimumOverall": 0.92,
+        "minimumCriticalRegion": 0.92,
+        "minimumImportantElement": 0.88,
+        "minimumNormalTarget": 0.84,
+        "weights": {
+          "geometry": 0.35,
+          "typography": 0.15,
+          "perceptual": 0.25,
+          "rawPixel": 0.25
+        }
+      }
+    }
+  },
+  "hardGates": {
+    "scopeAligned": true,
+    "dataFixtureMatched": true,
+    "stateMatched": true,
+    "requiredElementsComplete": true,
+    "contentMatched": true,
+    "noOverflowOrOcclusion": true,
+    "maximumOcclusionRatio": 0
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "kind": "visual-evaluation",
+  "schemaVersion": "1.0",
+  "profile": "component-faithful",
+  "inputs": {
+    "policy": "visual-acceptance-policy.json",
+    "visualContract": "01-visual-contract.json",
+    "componentAdaptation": "02-component-adaptation.json",
+    "alignmentReport": "iterations/iteration-00/alignment-report.json",
+    "pixelReport": "iterations/iteration-00/pixel-report.json"
+  },
+  "hardGates": {
+    "scopeAligned": true,
+    "dataFixtureMatched": true,
+    "stateMatched": true,
+    "requiredElementsComplete": true,
+    "contentMatched": true,
+    "noOverflowOrOcclusion": true
+  },
+  "scores": {
+    "overall": 1,
+    "minimumCriticalRegion": 1,
+    "minimumImportantElement": 1,
+    "perceptualGlobal": 1
+  },
+  "targets": [
+    {
+      "id": "page-root",
+      "type": "region",
+      "criticality": "critical",
+      "score": 1,
+      "passed": true,
+      "geometry": {
+        "positionDeltaPx": 0,
+        "sizeDeltaPx": 0,
+        "iou": 1,
+        "score": 1,
+        "passed": true
+      },
+      "typography": null,
+      "perceptual": {
+        "similarity": 1,
+        "passed": true
+      },
+      "rawPixel": {
+        "role": "diagnostic-only",
+        "meanAbsoluteError": 0,
+        "differentPixelRatio": 0,
+        "passedDiagnosticThresholds": true
+      },
+      "failures": []
+    }
+  ],
+  "failures": [],
+  "diagnostics": {
+    "rawPixelRole": "diagnostic-only",
+    "rawPixelThresholdsPassed": true,
+    "note": "原始像素差异在 component-faithful 下不影响最终状态。"
+  },
+  "status": "pass"
+}

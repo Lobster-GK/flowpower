@@ -1,0 +1,30 @@
+:root {
+  font-family: Arial, "Microsoft YaHei", sans-serif;
+  color: #1f2329;
+  background: #f5f6f8;
+  font-synthesis: none;
+  text-rendering: geometricPrecision;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#visual-lab-root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+html[data-visual-lab-capture='true'] *,
+html[data-visual-lab-capture='true'] *::before,
+html[data-visual-lab-capture='true'] *::after {
+  animation: none !important;
+  caret-color: transparent !important;
+  scroll-behavior: auto !important;
+  transition: none !important;
+}

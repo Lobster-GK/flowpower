@@ -1,0 +1,4 @@
+interface:
+  display_name: "前端 Visual Lab 验收"
+  short_description: "在隔离 Vite 沙箱中生成基础 UI 并完成截图视觉验收"
+  default_prompt: "Use $frontend-visual-fidelity-loop to generate a static-fixture UI in the isolated Vite Visual Lab and stop after sandbox-only visual acceptance."

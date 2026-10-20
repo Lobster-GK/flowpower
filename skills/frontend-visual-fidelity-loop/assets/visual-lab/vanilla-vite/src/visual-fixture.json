@@ -1,0 +1,11 @@
+{
+  "title": "用户管理",
+  "subtitle": "静态视觉沙箱示例",
+  "primaryAction": "新增用户",
+  "rows": [
+    { "id": "u-001", "name": "张三", "role": "管理员", "status": "启用" },
+    { "id": "u-002", "name": "李四", "role": "编辑", "status": "启用" },
+    { "id": "u-003", "name": "王五", "role": "访客", "status": "启用" }
+  ],
+  "paginationText": "共 3 条"
+}

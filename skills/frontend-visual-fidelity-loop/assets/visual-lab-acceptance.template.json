@@ -1,0 +1,38 @@
+{
+  "kind": "visual-lab-acceptance",
+  "schemaVersion": "1.0",
+  "labId": "replace-with-task-id",
+  "executionScope": "sandbox-only",
+  "reference": "reference.png",
+  "visualLabLock": "visual-lab-lock.json",
+  "evaluationReport": "iterations/iteration-00/visual-evaluation.json",
+  "acceptedIteration": 0,
+  "profile": "component-faithful",
+  "scopeAlignmentVerified": true,
+  "staticFixtureVerified": true,
+  "environmentVerified": true,
+  "requiredElementsComplete": true,
+  "criticalRegionsPassing": true,
+  "hardGates": {
+    "scopeAligned": true,
+    "dataFixtureMatched": true,
+    "stateMatched": true,
+    "requiredElementsComplete": true,
+    "contentMatched": true,
+    "noOverflowOrOcclusion": true
+  },
+  "scores": {
+    "overall": 1,
+    "minimumCriticalRegion": 1,
+    "minimumImportantElement": 1,
+    "perceptualGlobal": 1
+  },
+  "boundary": {
+    "targetProjectRead": false,
+    "targetProjectModified": false,
+    "migrationIncluded": false,
+    "integrationValidationIncluded": false
+  },
+  "remainingNonBlockingDifferences": [],
+  "status": "pass"
+}

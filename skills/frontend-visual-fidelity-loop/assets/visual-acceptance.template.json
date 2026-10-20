@@ -1,0 +1,41 @@
+{
+  "kind": "visual-acceptance",
+  "schemaVersion": "1.0",
+  "reference": "reference.png",
+  "acceptedIteration": 0,
+  "profile": "component-faithful",
+  "evaluationReport": "iterations/iteration-00/visual-evaluation.json",
+  "scopeAlignmentVerified": true,
+  "dataFixtureRequired": true,
+  "dataFixtureVerified": true,
+  "dataFixture": {
+    "fixtureSetId": "users-table-default-v1",
+    "fixtureSetDigest": "d0fcf0eaa6fba4c77558fe5d1b1c1c1ac6b34d8e7f5bf637d4fde171302feb95"
+  },
+  "environmentVerified": true,
+  "requiredElementsComplete": true,
+  "criticalRegionsPassing": true,
+  "hardGates": {
+    "scopeAligned": true,
+    "dataFixtureMatched": true,
+    "stateMatched": true,
+    "requiredElementsComplete": true,
+    "contentMatched": true,
+    "noOverflowOrOcclusion": true
+  },
+  "scores": {
+    "overall": 1,
+    "minimumCriticalRegion": 1,
+    "minimumImportantElement": 1,
+    "perceptualGlobal": 1
+  },
+  "metrics": {
+    "meanAbsoluteError": 0,
+    "differentPixelRatio": 0,
+    "threshold": 16,
+    "rawPixelRole": "diagnostic-only"
+  },
+  "acceptedPlatformDifferences": [],
+  "remainingNonBlockingDifferences": [],
+  "status": "pass"
+}

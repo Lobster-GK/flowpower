@@ -1,0 +1,54 @@
+id: feature-change
+name: 功能变更与新增需求
+description: 对已有前端功能做变更、新增局部需求或小范围重构，并在改代码前生成持久化计划。
+notes:
+  - 先定位已有实现和变更边界，再生成生码计划规格文档。
+  - 只有创建新 UI 或大幅改变 UI 结构时，才要求布局说明规格文档和组件映射规格文档。
+  - 不做无关重构，不顺手修改未进入计划的文件。
+match:
+  intents:
+    - feature-change
+    - update-existing
+    - new-requirement
+    - refactor-small
+artifacts:
+  codegenPlanSpec: 03-codegen-plan-spec.md
+stages:
+  - id: clarify-scope
+    instruction: 确认用户目标、目标页面/组件/文件、变更边界、非目标和可用验证方式；如果会创建新 UI 或大幅改变 UI 结构，要求先补齐布局说明规格文档和组件映射规格文档。
+  - id: context
+    instruction: 读取和当前变更相关的已有实现、项目资产、组件约定和同类代码，只返回任务相关事实。
+    use:
+      subagent: afp-context-agent
+  - id: codegen-plan
+    use:
+      subagent: afp-planner-agent
+      skill: frontend-codegen-plan
+    output: artifacts.codegenPlanSpec
+  - id: codegen
+    use:
+      subagent: afp-builder-agent
+      skill: frontend-ui-codegen
+    requires:
+      - artifacts.codegenPlanSpec
+  - id: lint
+    use:
+      subagent: afp-verifier-agent
+      skill: frontend-lint-check
+    onFail: fix-and-retry
+    maxRetries: 3
+  - id: boot
+    use:
+      subagent: afp-verifier-agent
+      skill: frontend-boot-check
+    onFail: fix-and-retry
+    maxRetries: 3
+  - id: runtime
+    use:
+      subagent: afp-verifier-agent
+      skill: frontend-runtime-check
+    when: 用户要求浏览器验证、变更涉及运行时交互，或前面阶段生成了可启动页面。
+    onFail: fix-and-retry
+    maxRetries: 3
+  - id: final-summary
+    instruction: 总结需求落实情况、修改文件、验证结果、未覆盖风险和后续建议。

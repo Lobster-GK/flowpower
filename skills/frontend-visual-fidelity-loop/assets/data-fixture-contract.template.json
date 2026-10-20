@@ -1,0 +1,48 @@
+{
+  "kind": "data-fixture-contract",
+  "schemaVersion": "1.0",
+  "fixtureSetId": "users-table-default-v1",
+  "mode": "static",
+  "network": {
+    "rejectUnmatchedBusinessRequests": true,
+    "businessUrlPatterns": ["**/api/**"],
+    "allowUnmockedUrlPatterns": ["**/*.js", "**/*.css", "**/fonts/**"]
+  },
+  "runtime": {
+    "freezeTime": true,
+    "now": "2026-08-12T02:00:00.000Z",
+    "freezeRandom": true,
+    "randomSeed": "visual-users-default-v1",
+    "timezone": "Asia/Shanghai",
+    "locale": "zh-CN",
+    "storageSeeded": true
+  },
+  "requests": [
+    {
+      "id": "users-list",
+      "method": "GET",
+      "urlPattern": "**/api/users?page=1&pageSize=10",
+      "minMatches": 1,
+      "maxMatches": 1,
+      "response": {
+        "fixture": "fixtures/users-table-default.response.json",
+        "status": 200,
+        "contentType": "application/json; charset=utf-8"
+      }
+    }
+  ],
+  "visibleAssertions": [
+    {
+      "id": "users-visible-row-count",
+      "selector": "[data-visual-id='user-table'] tbody tr",
+      "kind": "count",
+      "expected": 3
+    },
+    {
+      "id": "users-pagination-text",
+      "selector": "[data-visual-id='user-table-pagination']",
+      "kind": "text",
+      "expected": "共 3 条"
+    }
+  ]
+}

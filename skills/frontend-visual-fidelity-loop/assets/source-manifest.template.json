@@ -1,0 +1,64 @@
+{
+  "kind": "source-manifest",
+  "schemaVersion": "1.0",
+  "task": "replace-with-task-name",
+  "reference": {
+    "path": "reference.png",
+    "imageWidth": 1200,
+    "imageHeight": 800,
+    "crop": { "x": 0, "y": 0, "width": 1200, "height": 800 },
+    "state": "default",
+    "scroll": { "x": 0, "y": 0 }
+  },
+  "render": {
+    "url": "http://localhost:3000/replace-route",
+    "viewport": { "width": 1440, "height": 900 },
+    "dpr": 1,
+    "zoom": 1,
+    "rootSelector": "#app",
+    "browser": "chromium",
+    "stateFixture": "default"
+  },
+  "comparisonScope": {
+    "type": "page-content",
+    "status": "confirmed",
+    "evidence": ["reference contains content only; application shell is outside the target canvas"],
+    "referenceBox": "reference.crop",
+    "actual": {
+      "captureMode": "locator",
+      "selector": "[data-visual-id='content-root']",
+      "box": "border-box",
+      "keepApplicationShell": true,
+      "clipInset": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+      "bleed": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+      "captureOnlyMutations": []
+    },
+    "alignment": {
+      "mode": "selector-origin",
+      "sizePolicy": "calibrate-viewport",
+      "tolerance": 2,
+      "anchors": []
+    },
+    "maskPolicy": {
+      "maxAreaRatio": 0.05,
+      "allowOverLimit": false
+    },
+    "masks": []
+  },
+  "dataFixture": {
+    "required": true,
+    "contract": "00-data-fixture-contract.json",
+    "lock": "00-data-fixture-lock.json",
+    "expectedFixtureSetId": "users-table-default-v1",
+    "expectedFixtureSetDigest": "d0fcf0eaa6fba4c77558fe5d1b1c1c1ac6b34d8e7f5bf637d4fde171302feb95"
+  },
+  "normalization": {
+    "waitForFonts": true,
+    "waitForImages": true,
+    "disableAnimations": true,
+    "freezeTime": true,
+    "freezeRandom": true,
+    "hideCaret": true
+  },
+  "blockers": []
+}

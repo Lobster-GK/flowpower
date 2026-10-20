@@ -1,0 +1,28 @@
+{
+  "kind": "visual-context-packet",
+  "schemaVersion": "1.0",
+  "phase": "repair",
+  "iteration": 1,
+  "goal": "repair only the active failed target",
+  "invariants": [
+    "do not change viewport, crop, fixture or acceptance profile",
+    "do not read scripts or unrelated historical reports",
+    "modify only allowedFiles"
+  ],
+  "allowedFiles": [
+    "visual-lab/src/generated-ui.css"
+  ],
+  "canonicalArtifacts": {},
+  "activeTargets": [],
+  "evidenceImages": [],
+  "previousDelta": null,
+  "budget": {
+    "estimatedTextTokens": 0,
+    "imageCount": 0,
+    "targetCount": 0,
+    "maximumTextTokens": 12000,
+    "maximumImages": 3,
+    "maximumTargets": 1,
+    "passed": true
+  }
+}
